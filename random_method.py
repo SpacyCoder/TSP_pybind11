@@ -22,7 +22,3 @@ class RandomMethod:
                 tour.append(randomIndex)
         
         return tour, getCost(tour, self.edges)
-
-    
-    
-    
