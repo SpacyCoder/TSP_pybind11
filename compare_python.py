@@ -1,6 +1,6 @@
 from random import randint
 from utils import getCost, numberOfCitiesVisited
-from random_method import RandomMethod
+import random_method 
 from iterative_random_method import IterativeRandomMethod
 from greedy_method import GreedyMethod
 from greedy_optimization import GreedyOptimization
@@ -9,7 +9,7 @@ import numpy as np
 import time
 
 import random, numpy
-edges = numpy.random.randint(1,1000,(1000, 1000))
+edges = numpy.random.randint(1,1000,(10000, 10000))
 numberOfCities = len(edges)
 for i in range(0, len(edges)):
     edges[i][i] = 0
@@ -17,25 +17,22 @@ for i in range(0, len(edges)):
 
 print("Start Random Algorithm")
 start = time.time()
-randomTour, randomCost = RandomMethod(edges).run()
+randomTour, randomCost = random_method.RandomMethod(edges).run()
 end = time.time()
-print("Random used:",end-start, "seconds")
-print("Random Cost:", randomCost)
+print("Random Cost:", randomCost, "Time:", end-start)
 
 iterations = 10
 print("Start Iterative Random Algorithm")
 start = time.time()
 iterativeRandomTour, iterativeRandomCost = IterativeRandomMethod(edges, iterations).run()
 end = time.time()
-print("Iterative Random used:",end-start, "seconds")
-print("Iterative Random Cost:", iterativeRandomCost)
+print("Iterative Random Cost:", iterativeRandomCost, "Time:", end-start)
 
 print("Start Greedy Algorithm")
 start = time.time()
 greedyTour, greedyCost = GreedyMethod(edges).run()
 end = time.time()
-print("Greedy used:",end-start, "seconds")
-print( "Greedy Cost:", greedyCost)
+print( "Greedy Cost:", greedyCost, "Time", end-start)
 
 stopCriterion = 20
 greedyOptimized, greedyOptimizedCost = GreedyOptimization(edges, stopCriterion).run(randomTour)

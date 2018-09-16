@@ -4,11 +4,37 @@
 #include <random>
 #include <iostream>
 #include <limits>
+#include <cmath>
 
 struct RetVal {
   std::vector<int> tour;
   int cost;
 };
+
+int dist(int x1, int y1, int x2, int y2) {
+    int delta_x = x2 - x1;
+    int delta_y = y2 - y1;
+
+    return std::round(std::sqrt((delta_x * delta_x)  + (delta_y* delta_y)));
+}
+
+std::vector<std::vector<int>> generate_edges(std::vector<int> x, std::vector<int> y, int length) {
+    std::vector<std::vector<int>> edges;
+
+    for (int i = 0; i < length; i++) {
+        std::vector<int> row;
+        for(int j = 0; j < length; j++) {
+            int x1 = x[i];
+            int y1 = y[i];
+            int x2 = x[j];
+            int y2 = y[j];
+            row.push_back(dist(x1, y1, x2, y2));
+        }
+        edges.push_back(row);
+    }
+
+    return edges;
+}
 
 int get_cost(std::vector<int> tour, int length, std::vector<std::vector<int>> edges){
     int cost = 0;
@@ -83,17 +109,16 @@ std::tuple<std::vector<int>, int> iterative_random_method(std::vector<std::vecto
     return std::make_tuple(best_tour, best_cost);
 }
 
-int get_nearest_city(int from_city, bool visited_cities[], int length, std::vector<std::vector<int>> edges) {
+int get_nearest_city(bool visited_cities[], int length, std::vector<int> city_dist) {
     int smallest_cost = std::numeric_limits<int>::max();
     int to_city = 0;
 
     for(int city = 0; city < length; city++) {
-
-        const int cost = edges[from_city][city];
-        if(city == from_city) {
+        const int cost = city_dist[city];
+        if(cost == 0 || visited_cities[city]) {
             continue;
         } 
-        if(cost < smallest_cost && !visited_cities[city]) {
+        if(cost < smallest_cost) {
             to_city = city;
             smallest_cost = cost;
         }
@@ -112,11 +137,11 @@ std::tuple<std::vector<int>, int> greedy_method(std::vector<std::vector<int>> ed
     int starting_city = idist(rgen);
     tour.push_back(starting_city);
     visited_cities[starting_city] = true;
-    
+
     int current_city = starting_city;
     int tour_length = 1;
-    while (tour_length != num_cities) {
-        int city = get_nearest_city(current_city, visited_cities,num_cities, edges);
+    while (tour_length < num_cities) {
+        int city = get_nearest_city(visited_cities, num_cities, edges[current_city]);
         current_city = city;
         visited_cities[city] = true;
         tour.push_back(city);
@@ -207,11 +232,12 @@ std::tuple<std::vector<int>, int> greedy_random_optimization(std::vector<int> to
 
     
 PYBIND11_MODULE(TSP, m) {
-    m.doc() = "pybind11 example plugin";
+    m.doc() = "pybind11 plugin";
     m.def("random_method", &random_method, "Finds a random solution to the traveling salesman problem");
     m.def("iterative_random_method", &iterative_random_method, "Finds a solution to the traveling salesman problem");
     m.def("greedy_method", &greedy_method, "Finds a solution to the traveling salesman problem");
 
     m.def("greedy_optimization", &greedy_optimization, "Optimizes a solution to TSP");
     m.def("greedy_random_optimization", &greedy_random_optimization, "Optimizes a solution to TSP");
+    m.def("generate_edges", &generate_edges, "Generates edges weights from  input coordiantes");
 }
