@@ -9,7 +9,7 @@ import numpy as np
 import time
 
 import random, numpy
-edges = numpy.random.randint(1,1000,(10000, 10000))
+edges = numpy.random.randint(1,1000,(100, 100))
 numberOfCities = len(edges)
 for i in range(0, len(edges)):
     edges[i][i] = 0
@@ -17,7 +17,9 @@ for i in range(0, len(edges)):
 
 print("Start Random Algorithm")
 start = time.time()
+print("IM HERE")
 randomTour, randomCost = random_method.RandomMethod(edges).run()
+print("IMERERH 2")
 end = time.time()
 print("Random Cost:", randomCost, "Time:", end-start)
 

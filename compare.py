@@ -5,6 +5,7 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from matplotlib.widgets import RadioButtons
 
 def dist(x1, y1,x2, y2):
     delta_x = x2 - x1
@@ -23,41 +24,25 @@ def make_matrix(x, y):
             D[i][j] = dist(x1, y1, x2, y2)
     return D
 
-def make_plot(tour1, tour2, tour3):
-    plot_x1 = []
-    plot_y1 = []
-    plot_x2 = []
-    plot_y2 = []
-    plot_x3 = []
-    plot_y3 = []
-    for i in range(len(tour1)):
-        city_index1 = tour1[i]
-        x_coord1 = x[city_index1]
-        y_coord1 = y[city_index1]
-        plot_x1.append(x_coord1)
-        plot_y1.append(y_coord1)
-        city_index2 = tour2[i]
-        x_coord2 = x[city_index2]
-        y_coord2 = y[city_index2]
-        plot_x2.append(x_coord2)
-        plot_y2.append(y_coord2)
-        city_index3 = tour3[i]
-        x_coord3 = x[city_index3]
-        y_coord3 = y[city_index3]
-        plot_x3.append(x_coord3)
-        plot_y3.append(y_coord3)
+def make_plot(*args):
     fig, ax = plt.subplots(3)
+    for i,tour in enumerate(args):
+        plot_x = []
+        plot_y = []
+        for j in range(len(tour)):
+            city_index1 = tour[j]
+            x_coord = x[city_index1]
+            y_coord = y[city_index1]
+            plot_x.append(x_coord)
+            plot_y.append(y_coord)
+        ax[i].scatter(x, y, s=10, c='r')
+        ax[i].plot(plot_x, plot_y)
 
-    ax[0].scatter(x, y, s=10, c='r')
-    ax[0].plot(plot_x1, plot_y1)
-    ax[1].scatter(x, y, s=10, c='r')
-    ax[1].plot(plot_x2, plot_y2)
-    ax[2].scatter(x, y, s=10, c='r')
-    ax[2].plot(plot_x3, plot_y3)
     return fig, ax
     
 
-num_cities = 50
+# Change this to the number of cities you want to generate
+num_cities = 1000
 x = np.random.randint(0, 10000, size=num_cities)
 y = np.random.randint(0, 10000, size=num_cities)
 
@@ -70,10 +55,8 @@ ax.grid()
 for i in range(0, num_cities):
     edges[i][i] = 0
 
-greedy_stop_criterion = 100000
-random_greedy_max_tries = 100000
-
-
+greedy_stop_criterion = 100
+random_greedy_max_tries = 100
 # RANDOM METHOD
 print("Starting random method...")
 start = time.time()
@@ -86,23 +69,22 @@ start = time.time()
 greedy_optimized_tour, greedy_optimized_cost = TSP.greedy_optimization(random_tour, random_cost, edges, num_cities, greedy_stop_criterion)
 end = time.time()
 greedy_optimized_random_time = end - start + random_time
-print("Random Cost(Greedy_optimized):", greedy_optimized_cost)
+print("Random Cost(Greedy_optimized):", greedy_optimized_cost, "Time:", greedy_optimized_random_time)
 
 start = time.time()
 greedy_random_optimized_tour, greedy_random_optimized_cost = TSP.greedy_random_optimization(random_tour, random_cost, edges, num_cities, random_greedy_max_tries)
 end = time.time()
 random_random_optimized_time = (end-start) + random_time
-print("Random Cost(Greedy Random Optimized):", greedy_random_optimized_cost)
+print("Random Cost(Greedy Random Optimized):", greedy_random_optimized_cost, "Time:", random_random_optimized_time)
 
 fig, ax = make_plot(random_tour, greedy_optimized_tour, greedy_random_optimized_tour)
 ax[0].set_title('Random Tour - cost: ' + str(random_cost) + ' - time: ' + str(random_time))
 ax[1].set_title('Random Tour(Greedy Optimized)- cost: ' + str(greedy_optimized_cost) + ' - time: ' + str(greedy_optimized_random_time))
 ax[2].set_title('Random Tour(Greedy Random Optimized)- cost: ' + str(greedy_random_optimized_cost) + ' - time: ' + str(random_random_optimized_time))
-
 print('----------------------------')
 
 ## ITERATIVE RANDOM METHOD
-max_iterations = 1000
+max_iterations = 100
 print("Starting iterative random method...")
 start = time.time()
 iterative_random_tour, iterative_random_cost = TSP.iterative_random_method(edges, num_cities, max_iterations)
@@ -114,12 +96,12 @@ start = time.time()
 greedy_optimized_tour, greedy_optimized_cost = TSP.greedy_optimization(iterative_random_tour, iterative_random_cost, edges, num_cities, greedy_stop_criterion)
 end = time.time()
 greedy_iterative_time = end-start + iterative_time
-print("Iterative Random Cost(Greedy Optimized):", greedy_optimized_cost)
+print("Iterative Random Cost(Greedy Optimized):", greedy_optimized_cost, "Time", greedy_iterative_time)
 start = time.time()
 greedy_random_optimized_tour, greedy_random_optimized_cost = TSP.greedy_random_optimization(iterative_random_tour, iterative_random_cost, edges, num_cities, random_greedy_max_tries)
 end = time.time()
 iter_rand_random_optimized_time = (end-start) + iterative_time
-print("Iterative Random Cost(Greedy Random Optimized):", greedy_random_optimized_cost)
+print("Iterative Random Cost(Greedy Random Optimized):", greedy_random_optimized_cost, "Time:", iter_rand_random_optimized_time )
 
 fig, ax = make_plot(iterative_random_tour, greedy_optimized_tour, greedy_random_optimized_tour)
 ax[0].set_title('Iterative Random Tour - cost: ' + str(iterative_random_cost) + ' - time: ' + str(iterative_time))
@@ -139,18 +121,17 @@ start = time.time()
 greedy_optimized_tour, greedy_optimized_cost = TSP.greedy_optimization(greedy_tour, greedy_cost, edges, num_cities, greedy_stop_criterion)
 end = time.time()
 greedy_optimized_time = end- start + greedy_time
-print("Greedy Cost(Greedy Optimized):", greedy_optimized_cost)
+
+print("Greedy Cost(Greedy Optimized):", greedy_optimized_cost, "Time:", greedy_optimized_time)
 start = time.time()
 greedy_random_optimized_tour, greedy_random_optimized_cost = TSP.greedy_random_optimization(greedy_tour, greedy_cost, edges, num_cities, random_greedy_max_tries)
 end = time.time()
 greedy_rand_optimized_time = end - start + greedy_time
-print("Greedy Cost(Greedy Random Optimized):", greedy_random_optimized_cost)
+print("Greedy Cost(Greedy Random Optimized):", greedy_random_optimized_cost, "Time:", greedy_rand_optimized_time)
 
 fig, ax = make_plot(greedy_tour, greedy_optimized_tour, greedy_random_optimized_tour)
 ax[0].set_title('Greedy Tour - cost: ' + str(greedy_cost) + ' - time: ' + str(greedy_time))
 ax[1].set_title('Greedy Tour(Greedy Optimized) - cost: ' + str(greedy_optimized_cost) + ' - time: ' + str(greedy_optimized_time))
 ax[2].set_title('Greedy Tour(Greedy Random Optimized)- cost: ' + str(greedy_random_optimized_cost) + ' - time: ' + str(greedy_rand_optimized_time))
-
-
 
 plt.show()

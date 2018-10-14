@@ -9,7 +9,7 @@ class GreedyMethod:
         self.edges = edges
         self.numberOfCities = len(edges)
 
-    def isBestTour(self, tour):
+    def isBestTour(self, tour, bestCost):
         newCost = getCost(tour, self.edges)
         return newCost < bestCost, newCost
     

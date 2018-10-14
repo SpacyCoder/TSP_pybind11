@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <algorithm>    // std::random_shuffle
 
 struct RetVal {
   std::vector<int> tour;
@@ -36,7 +37,7 @@ std::vector<std::vector<int>> generate_edges(std::vector<int> x, std::vector<int
     return edges;
 }
 
-int get_cost(std::vector<int> tour, int length, std::vector<std::vector<int>> edges){
+int get_cost(std::vector<int> tour, int length, std::vector<std::vector<int>>& edges){
     int cost = 0;
     for (int i = 0; i < length; i++) {
         int fromCity = tour[i - 1];
@@ -46,7 +47,7 @@ int get_cost(std::vector<int> tour, int length, std::vector<std::vector<int>> ed
     return cost;
 }
 
-int num_cities_visited(bool visited_cities[], int length, std::vector<std::vector<int>> edges) {
+int num_cities_visited(bool visited_cities[], int length, std::vector<std::vector<int>>& edges) {
     int count = 0;
     for(int i = 0; i < length; i++ ) {
         if(visited_cities[i]) {
@@ -57,10 +58,10 @@ int num_cities_visited(bool visited_cities[], int length, std::vector<std::vecto
 }
 
 
-std::tuple<std::vector<int>, int> random_method(std::vector<std::vector<int>> edges, int num_cities) {
+std::tuple<std::vector<int>, int> random_method(std::vector<std::vector<int>> &edges, int& num_cities) {
+    
     bool visited_cities[num_cities] = {false};
     std::vector<int> tour;
-
     std::random_device rdev;
     std::mt19937 rgen(rdev());
     std::uniform_int_distribution<int> idist(0, num_cities - 1); 
@@ -70,7 +71,16 @@ std::tuple<std::vector<int>, int> random_method(std::vector<std::vector<int>> ed
     visited_cities[starting_city] = true;
     
     int tour_length = 1;
-    while (tour_length != num_cities) {
+    while (tour_length < num_cities) {
+        if(tour_length > 900) {
+            for(int i = 0; i < num_cities; i++) {
+                if(!visited_cities[i]) {
+                    tour.push_back(i);
+                }
+            }
+
+            break;
+        }
         int rand_index = idist(rgen);
         if(!visited_cities[rand_index]) {
             tour_length++;
@@ -78,17 +88,18 @@ std::tuple<std::vector<int>, int> random_method(std::vector<std::vector<int>> ed
             tour.push_back(rand_index);
         }
     }
-
+     
+    /*
+        std::vector<int> tour;
+        for (int i = 0; i < num_cities; i++) {
+            tour.push_back(i);
+        }
+        std::random_shuffle ( tour.begin(), tour.end() );
+    */
     return std::make_tuple(tour, get_cost(tour, num_cities, edges));
 }
-/*
-bool isBestTour(std::vector<int> tour, int length, std::vector<std::vector<int>> edges, int best_cost) {
-    int new_cost = get_cost(tour, length, edges);
-    return new_cost < best_cost, newCnew_costost
-}
-*/
 
-std::tuple<std::vector<int>, int> iterative_random_method(std::vector<std::vector<int>> edges, int num_cities, int max_iterations){
+std::tuple<std::vector<int>, int> iterative_random_method(std::vector<std::vector<int>> &edges, int num_cities, int max_iterations){
     bool stop = false;
     int iterations = 0;
     std::vector<int> best_tour;
@@ -109,7 +120,7 @@ std::tuple<std::vector<int>, int> iterative_random_method(std::vector<std::vecto
     return std::make_tuple(best_tour, best_cost);
 }
 
-int get_nearest_city(bool visited_cities[], int length, std::vector<int> city_dist) {
+int get_nearest_city(bool visited_cities[], int& length, std::vector<int>& city_dist) {
     int smallest_cost = std::numeric_limits<int>::max();
     int to_city = 0;
 
@@ -152,7 +163,7 @@ std::tuple<std::vector<int>, int> greedy_method(std::vector<std::vector<int>> ed
 }
 
 
-std::tuple<std::vector<int>, int> greedy_optimization(std::vector<int> tour, int cost, std::vector<std::vector<int>> edges, int num_cities, int stop_criterion) {
+std::tuple<std::vector<int>, int> greedy_optimization(std::vector<int> tour, int cost, std::vector<std::vector<int>>& edges, int& num_cities, int& stop_criterion) {
     std::random_device rdev;
     std::mt19937 rgen(rdev());
     std::uniform_int_distribution<int> idist(0, num_cities - 1); 
@@ -186,11 +197,12 @@ std::tuple<std::vector<int>, int> greedy_optimization(std::vector<int> tour, int
     return std::make_tuple(best_tour, best_cost);
 }
 
-std::tuple<std::vector<int>, int> greedy_random_optimization(std::vector<int> tour, int cost, std::vector<std::vector<int>> edges, int num_cities, int max_tries) {
+std::tuple<std::vector<int>, int> greedy_random_optimization(std::vector<int> tour, int cost, std::vector<std::vector<int>>& edges, int& num_cities, int& max_tries) {
     std::random_device rdev;
     std::mt19937 rgen(rdev());
     std::uniform_int_distribution<int> idist(0, num_cities - 1); 
     std::uniform_real_distribution<double> rdist(0, 1);
+    
     std::vector<int> best_tour = tour;
     int best_cost = cost;
     std::vector<int> old_tour = best_tour;
@@ -229,7 +241,6 @@ std::tuple<std::vector<int>, int> greedy_random_optimization(std::vector<int> to
 
     return std::make_tuple(best_tour, best_cost);
 }
-
     
 PYBIND11_MODULE(TSP, m) {
     m.doc() = "pybind11 plugin";
