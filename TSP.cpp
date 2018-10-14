@@ -88,14 +88,6 @@ std::tuple<std::vector<int>, int> random_method(std::vector<std::vector<int>> &e
             tour.push_back(rand_index);
         }
     }
-     
-    /*
-        std::vector<int> tour;
-        for (int i = 0; i < num_cities; i++) {
-            tour.push_back(i);
-        }
-        std::random_shuffle ( tour.begin(), tour.end() );
-    */
     return std::make_tuple(tour, get_cost(tour, num_cities, edges));
 }
 
@@ -250,5 +242,5 @@ PYBIND11_MODULE(TSP, m) {
 
     m.def("greedy_optimization", &greedy_optimization, "Optimizes a solution to TSP");
     m.def("greedy_random_optimization", &greedy_random_optimization, "Optimizes a solution to TSP");
-    m.def("generate_edges", &generate_edges, "Generates edges weights from  input coordiantes");
+    m.def("generate_edges", &generate_edges, "Generates edges weights from input coordiantes");
 }

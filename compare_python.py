@@ -17,9 +17,7 @@ for i in range(0, len(edges)):
 
 print("Start Random Algorithm")
 start = time.time()
-print("IM HERE")
 randomTour, randomCost = random_method.RandomMethod(edges).run()
-print("IMERERH 2")
 end = time.time()
 print("Random Cost:", randomCost, "Time:", end-start)
 
